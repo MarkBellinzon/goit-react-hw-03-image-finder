@@ -109,7 +109,7 @@ export class App extends Component {
           />
         )}
         <ScrollToTop showUnder={160}>
-          {/* <span>UP</span> */}
+          
         </ScrollToTop>
       </div>
     );
