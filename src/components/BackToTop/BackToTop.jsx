@@ -20,7 +20,7 @@ export const ScrollToTop = () => {
   return (
     <div className={css.scrollup}>
       <button
-        className={css.scroll }
+        className={scroll > 300 ? '' : 'show'}
         onClick={handleUpButton}
       ></button>
     </div>
