@@ -19,7 +19,7 @@ export class ImageApi {
 
   async fetchImageOrPhoto() {
     const res = await fetch(
-      `${BASE_URL}/?q=${this.searchQuery}&page=${this.page}&key=${API_KEY}&image_type=photo&orientation=horizontal&per_page=100`,
+      `${BASE_URL}/?q=${this.searchQuery}&page=${this.page}&key=${API_KEY}&image_type=photo&orientation=horizontal&per_page=30`,
     );
     const { hits } = await res.json();
     return hits;
