@@ -1,5 +1,5 @@
 import { Component } from "react";
-import s from "./Modal.module.css";
+import css from "./Modal.module.css";
 
 export class Modal extends Component {
   componentDidMount() {
@@ -18,7 +18,7 @@ export class Modal extends Component {
     this.props.onModalClick();
   };
 
-  closeModalByBackdropClick = (e) => {
+  closeModal = (e) => {
     if (e.currentTarget === e.target) {
       this.props.onModalClick();
     }
@@ -26,8 +26,8 @@ export class Modal extends Component {
 
   render() {
     return (
-      <div className={s.Overlay} onClick={this.closeModalByBackdropClick}>
-        <div className={s.Modal}>
+      <div className={css.Overlay} onClick={this.closeModal}>
+        <div className={css.Modal}>
           <img src={this.props.modalImage} alt={this.props.modalAltText} />
         </div>
       </div>

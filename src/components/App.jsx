@@ -5,7 +5,7 @@ import { Searchbar } from './Searchbar/Searchbar';
 import { Button } from './Button/Button';
 import { Modal } from './Modal/Modal';
 import { ImageApi } from '../components/fetchAPI/fetchAPI';
-import s from './App.module.css';
+import css from './App.module.css';
 import { ScrollToTop } from './BackToTop/BackToTop'
 
 const image = new ImageApi();
@@ -26,7 +26,7 @@ export class App extends Component {
       image.resetPage();
       image.query = this.state.query;
       image
-        .fetchImageOrPhoto()
+        .fetchImage()
         .then(images => this.setState({ images }))
         .finally(() => this.setState({ showLoader: false }));
       image.incrementpage();
@@ -48,7 +48,7 @@ export class App extends Component {
   loadMoreImages = () => {
     this.setState({ showLoader: true });
     image
-      .fetchImageOrPhoto()
+      .fetchImage()
       .then(newImages => {
         if (!newImages.length) {
           console.log('конец');
@@ -74,7 +74,7 @@ export class App extends Component {
 
   render() {
     return (
-      <div className={s.App}>
+      <div className={css.App}>
         <Searchbar onSubmit={this.handleSumbit} />
 
         {this.state.images.length > 1 && (
@@ -90,15 +90,7 @@ export class App extends Component {
           </>
         )}
         {this.state.showLoader && (
-          <Loader
-            type="Puff"
-            color="#00BFFF"
-            height={100}
-            width={100}
-            timeout={50000}
-            // style={{ display: 'block' }}
-            style={{ textAlign: 'center' }}
-          />
+          <Loader />
         )}
 
         {this.state.showModal && (
@@ -108,9 +100,7 @@ export class App extends Component {
             onModalClick={this.modalToggle}
           />
         )}
-        <ScrollToTop showUnder={160}>
-          
-        </ScrollToTop>
+        <ScrollToTop showUnder={50} />
       </div>
     );
   }

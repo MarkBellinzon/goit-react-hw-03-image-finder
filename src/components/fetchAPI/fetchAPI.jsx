@@ -17,7 +17,7 @@ export class ImageApi {
     this.searchQuery = value;
   }
 
-  async fetchImageOrPhoto() {
+  async fetchImage() {
     const res = await fetch(
       `${BASE_URL}/?q=${this.searchQuery}&page=${this.page}&key=${API_KEY}&image_type=photo&orientation=horizontal&per_page=30`,
     );

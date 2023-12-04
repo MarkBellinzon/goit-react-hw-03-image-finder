@@ -1,5 +1,5 @@
 import { Component } from 'react';
-import s from './Searchbar.module.css';
+import css from './Searchbar.module.css';
 
 export class Searchbar extends Component {
   state = {
@@ -8,27 +8,22 @@ export class Searchbar extends Component {
 
   handleChahge = e => {
     const { name, value } = e.target;
-
     this.setState({ [name]: value.toLowerCase() });
   };
 
   handleSubmit = e => {
     e.preventDefault();
-
     this.props.onSubmit(this.state.query);
-  };
+      };
 
   render() {
     return (
-      <header className={s.Searchbar}>
- 
-
-        <form className={s.SearchForm} onSubmit={this.handleSubmit}>
-        <button className={s.SearchFormButtonLabel}>Search</button>
-                   
+      <header className={css.Searchbar}>
+        <form className={css.SearchForm} onSubmit={this.handleSubmit}>
+          <button className={css.SearchBtn}>Search</button>
 
           <input
-            className={s.SearchFormInput}
+            className={css.SearchFormInput}
             type="text"
             autoComplete="off"
             name="query"
