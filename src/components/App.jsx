@@ -6,7 +6,7 @@ import { Button } from './Button/Button';
 import { Modal } from './Modal/Modal';
 import { ImageApi } from '../components/fetchAPI/fetchAPI';
 import css from './App.module.css';
-import { ScrollToTop } from './BackToTop/BackToTop'
+import { ScrollToTop } from './BackToTop/BackToTop';
 
 const image = new ImageApi();
 
@@ -18,6 +18,7 @@ export class App extends Component {
     modalImage: '',
     modalAltText: '',
     showLoader: false,
+    hasMoreImages: true,
   };
 
   componentDidUpdate(prevProps, prevState) {
@@ -50,16 +51,17 @@ export class App extends Component {
     image
       .fetchImage()
       .then(newImages => {
-        if (!newImages.length) {
-          console.log('конец');
+        if (newImages.length === 0) {
+          // Якщо нові зображення не повертаються, більше немає зображень для завантаження
+          // console.log('No more images to load');
+          this.setState({ hasMoreImages: false });
           return;
         }
 
-        this.setState(({ images }) => {
-          return {
-            images: [...images, ...newImages],
-          };
-        });
+        this.setState(prevState => ({
+          images: [...prevState.images, ...newImages],
+          hasMoreImages: true, // Скинути до значення true, припускаючи, що може бути більше зображень
+        }));
       })
       .finally(() => {
         window.scrollTo({
@@ -84,14 +86,12 @@ export class App extends Component {
               onModalClick={this.modalToggle}
               query={this.state.query}
             />
-            {!this.state.showLoader && (
+            {!this.state.showLoader && this.state.hasMoreImages && (
               <Button onSearch={this.loadMoreImages} />
             )}
           </>
         )}
-        {this.state.showLoader && (
-          <Loader />
-        )}
+        {this.state.showLoader && <Loader />}
 
         {this.state.showModal && (
           <Modal
