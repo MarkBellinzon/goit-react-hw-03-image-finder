@@ -126,7 +126,7 @@ export class App extends Component {
 
         {isLoading && <Loader />}
 
-        {imagesOnPage >= 12 && imagesOnPage < totalImages && (
+        {imagesOnPage >= 30 && imagesOnPage < totalImages && (
           <Button onNextFetch={onNextFetch} />
         )}
 
