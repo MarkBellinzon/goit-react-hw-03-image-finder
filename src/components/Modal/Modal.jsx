@@ -3,7 +3,6 @@ import css from './Modal.module.css';
 import * as basicLightbox from 'basiclightbox';
 
 export class Modal extends Component {
-
   handleClickImage = () => {
     const { currentImageUrl, currentImageDescription } = this.props;
 
