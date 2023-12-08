@@ -1,14 +1,8 @@
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import css from './Modal.module.css';
 import * as basicLightbox from 'basiclightbox';
 
 export class Modal extends Component {
-  static propTypes = {
-    currentImageUrl: PropTypes.string,
-    currentImageDescription: PropTypes.string,
-    onClose: PropTypes.func.isRequired,
-  };
 
   handleClickImage = () => {
     const { currentImageUrl, currentImageDescription } = this.props;
