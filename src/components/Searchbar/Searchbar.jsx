@@ -1,35 +1,53 @@
 import { Component } from 'react';
+import PropTypes from 'prop-types';
+import { toast } from 'react-toastify';
 import css from './Searchbar.module.css';
 
 export class Searchbar extends Component {
+  static propTypes = {
+    onSubmit: PropTypes.func.isRequired,
+  };
+
   state = {
     query: '',
   };
 
-  handleChahge = e => {
-    const { name, value } = e.target;
-    this.setState({ [name]: value.toLowerCase() });
+  onChangeInput = e => {
+    this.setState({ query: e.currentTarget.value });
   };
 
-  handleSubmit = e => {
+  onSubmitForm = e => {
     e.preventDefault();
-    this.props.onSubmit(this.state.query);
+
+    const { onSubmit } = this.props;
+    const { query } = this.state;
+
+    if (query.trim() === '') {
+      toast.error('Enter a search term.');
+      return;
+    }
+
+    onSubmit(query);
   };
 
   render() {
+    const { query } = this.state;
+
     return (
-      <header className={css.Searchbar}>
-        <form className={css.SearchForm} onSubmit={this.handleSubmit}>
-          <button className={css.SearchBtn}>Search</button>
+      <header className={css.header}>
+        <form className={css.form} onSubmit={this.onSubmitForm}>
+          <button className={css.button} type="submit">
+            Search
+          </button>
 
           <input
-            className={css.SearchFormInput}
+            className={css.input}
             type="text"
             autoComplete="off"
-            name="query"
-            value={this.state.query}
+            autoFocus
             placeholder="Search images and photos"
-            onChange={this.handleChahge}
+            value={query}
+            onChange={this.onChangeInput}
           />
         </form>
       </header>

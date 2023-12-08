@@ -1,107 +1,145 @@
 import { Component } from 'react';
-import { Loader } from './Loader/Loader';
-import { ImageGallery } from './ImageGallery/ImageGallery';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { fetchImages } from './fetchAPI/fetchAPI';
 import { Searchbar } from './Searchbar/Searchbar';
+import { ImageGallery } from './ImageGallery/ImageGallery';
 import { Button } from './Button/Button';
+import { Loader } from './Loader/Loader';
 import { Modal } from './Modal/Modal';
-import { ImageApi } from '../components/fetchAPI/fetchAPI';
-import css from './App.module.css';
 import { ScrollToTop } from './BackToTop/BackToTop';
-
-const image = new ImageApi();
 
 export class App extends Component {
   state = {
     query: '',
-    images: [],
+    page: 1,
+    imagesOnPage: 0,
+    totalImages: 0,
+    isLoading: false,
     showModal: false,
-    modalImage: '',
-    modalAltText: '',
-    showLoader: false,
-    hasMoreImages: true,
+    images: null,
+    error: null,
+    currentImageUrl: null,
+    currentImageDescription: null,
   };
 
   componentDidUpdate(prevProps, prevState) {
-    if (prevState.query !== this.state.query) {
-      this.setState({ showLoader: true });
-      image.resetPage();
-      image.query = this.state.query;
-      image
-        .fetchImage()
-        .then(images => this.setState({ images }))
-        .finally(() => this.setState({ showLoader: false }));
-      image.incrementpage();
+    const { query, page } = this.state;
+
+    if (prevState.query !== query) {
+      this.setState(({ isLoading }) => ({ isLoading: !isLoading }));
+
+      fetchImages(query)
+        .then(({ hits, totalHits }) => {
+          const imagesArray = hits.map(hit => ({
+            id: hit.id,
+            description: hit.tags,
+            smallImage: hit.webformatURL,
+            largeImage: hit.largeImageURL,
+          }));
+
+          return this.setState({
+            page: 1,
+            images: imagesArray,
+            imagesOnPage: imagesArray.length,
+            totalImages: totalHits,
+          });
+        })
+        .catch(error => this.setState({ error }))
+        .finally(() =>
+          this.setState(({ isLoading }) => ({ isLoading: !isLoading }))
+        );
+    }
+
+    if (prevState.page !== page && page !== 1) {
+      this.setState(({ isLoading }) => ({ isLoading: !isLoading }));
+
+      fetchImages(query, page)
+        .then(({ hits }) => {
+          const imagesArray = hits.map(hit => ({
+            id: hit.id,
+            description: hit.tags,
+            smallImage: hit.webformatURL,
+            largeImage: hit.largeImageURL,
+          }));
+
+          return this.setState(({ images, imagesOnPage }) => {
+            return {
+              images: [...images, ...imagesArray],
+              imagesOnPage: imagesOnPage + imagesArray.length,
+            };
+          });
+        })
+        .catch(error => this.setState({ error }))
+        .finally(() =>
+          this.setState(({ isLoading }) => ({ isLoading: !isLoading }))
+        );
     }
   }
 
-  modalToggle = e => {
-    this.setState(({ showModal }) => ({
-      showModal: !showModal,
-      modalImage: !showModal ? e.target.dataset.src : '',
-      modalAltText: !showModal ? e.target.alt : '',
-    }));
+  getSearchRequest = query => {
+    this.setState({ query });
   };
 
-  handleSumbit = value => {
-    this.setState({ query: value, images: [] });
+  onNextFetch = () => {
+    this.setState(({ page }) => ({ page: page + 1 }));
   };
 
-  loadMoreImages = () => {
-    this.setState({ showLoader: true });
-    image
-      .fetchImage()
-      .then(newImages => {
-        if (newImages.length === 0) {
-          // Якщо нові зображення не повертаються, більше немає зображень для завантаження
-          // console.log('No more images to load');
-          this.setState({ hasMoreImages: false });
-          return;
-        }
+  toggleModal = () => {
+    this.setState(({ showModal }) => ({ showModal: !showModal }));
+  };
 
-        this.setState(prevState => ({
-          images: [...prevState.images, ...newImages],
-          hasMoreImages: true, // Скинути до значення true, припускаючи, що може бути більше зображень
-        }));
-      })
-      .finally(() => {
-        window.scrollTo({
-          top: document.documentElement.scrollHeight,
-          behavior: 'smooth',
-        });
-        this.setState({ showLoader: false });
-      });
+  openModal = e => {
+    const currentImageUrl = e.target.dataset.large;
+    const currentImageDescription = e.target.alt;
 
-    image.incrementpage();
+    if (e.target.nodeName === 'IMG') {
+      this.setState(({ showModal }) => ({
+        showModal: !showModal,
+        currentImageUrl: currentImageUrl,
+        currentImageDescription: currentImageDescription,
+      }));
+    }
   };
 
   render() {
+    const {
+      images,
+      imagesOnPage,
+      totalImages,
+      isLoading,
+      showModal,
+      currentImageUrl,
+      currentImageDescription,
+    } = this.state;
+
+    const getSearchRequest = this.getSearchRequest;
+    const onNextFetch = this.onNextFetch;
+    const openModal = this.openModal;
+    const toggleModal = this.toggleModal;
+
     return (
-      <div className={css.App}>
-        <Searchbar onSubmit={this.handleSumbit} />
+      <>
+        <Searchbar onSubmit={getSearchRequest} />
 
-        {this.state.images.length > 1 && (
-          <>
-            <ImageGallery
-              images={this.state.images}
-              onModalClick={this.modalToggle}
-              query={this.state.query}
-            />
-            {!this.state.showLoader && this.state.hasMoreImages && (
-              <Button onSearch={this.loadMoreImages} />
-            )}
-          </>
+        {images && <ImageGallery images={images} openModal={openModal} />}
+
+        {isLoading && <Loader />}
+
+        {imagesOnPage >= 30 && imagesOnPage < totalImages && (
+          <Button onNextFetch={onNextFetch} />
         )}
-        {this.state.showLoader && <Loader />}
 
-        {this.state.showModal && (
+        {showModal && (
           <Modal
-            modalImage={this.state.modalImage}
-            modalAltText={this.state.modalAltText}
-            onModalClick={this.modalToggle}
+            onClose={toggleModal}
+            currentImageUrl={currentImageUrl}
+            currentImageDescription={currentImageDescription}
           />
         )}
-        <ScrollToTop showUnder={50} />
-      </div>
+        <ScrollToTop />
+        <ToastContainer />
+      </>
     );
   }
 }
